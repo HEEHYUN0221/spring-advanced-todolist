@@ -1,4 +1,4 @@
-package com.example.todolist_advanced.common.config.encode;
+package com.example.todolist_advanced.common.utils;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;

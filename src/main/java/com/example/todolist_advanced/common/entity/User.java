@@ -1,6 +1,6 @@
 package com.example.todolist_advanced.common.entity;
 
-import com.example.todolist_advanced.common.config.encode.PasswordEncoder;
+import com.example.todolist_advanced.common.utils.PasswordEncoder;
 import com.example.todolist_advanced.user.model.request.SignUpRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,11 +21,11 @@ public class User extends BaseTime {
     private Long id; //유저 식별자
 
     @Setter
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false)
     private String userName;
 
     @Setter
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Setter

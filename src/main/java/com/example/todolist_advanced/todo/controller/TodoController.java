@@ -5,7 +5,7 @@ import com.example.todolist_advanced.todo.model.request.CreateTodoRequestDto;
 import com.example.todolist_advanced.todo.model.request.UpdateTodoRequestDto;
 import com.example.todolist_advanced.todo.model.response.DeleteTodoResponseDto;
 import com.example.todolist_advanced.todo.service.TodoService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +28,8 @@ public class TodoController {
     @PostMapping
     public ResponseEntity<TodoDto> createTodo(
             @RequestBody @Valid CreateTodoRequestDto request,
-            HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+            HttpServletRequest servletRequest) {
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(todoService.createTodo(userId, request), HttpStatus.CREATED);
     }
 
@@ -58,9 +58,9 @@ public class TodoController {
     public ResponseEntity<TodoDto> updateTodo(
             @RequestBody UpdateTodoRequestDto request,
             @PathVariable Long todoId,
-            HttpSession session
+            HttpServletRequest servletRequest
             ) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(todoService.updateTodo(userId,request,todoId),HttpStatus.OK);
     }
 
@@ -68,9 +68,9 @@ public class TodoController {
     @DeleteMapping("/{todoId}")
     public ResponseEntity<DeleteTodoResponseDto> deleteTodo(
             @PathVariable Long todoId,
-            HttpSession session
+            HttpServletRequest servletRequest
     ) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(todoService.deleteTodo(userId,todoId),HttpStatus.OK);
     }
 

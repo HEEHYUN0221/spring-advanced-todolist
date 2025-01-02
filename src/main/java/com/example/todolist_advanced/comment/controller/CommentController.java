@@ -5,9 +5,8 @@ import com.example.todolist_advanced.comment.model.request.CreateCommentRequestD
 import com.example.todolist_advanced.comment.model.request.UpdateCommentRequestDto;
 import com.example.todolist_advanced.comment.model.response.DeleteCommentResponseDto;
 import com.example.todolist_advanced.comment.service.CommentService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -28,8 +27,8 @@ public class CommentController {
     public ResponseEntity<CommentDto> createComment(
             @PathVariable("todoId") Long todoId,
             @RequestBody CreateCommentRequestDto request,
-            HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+            HttpServletRequest servletRequest) {
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(commentService.createComment(userId,request,todoId), HttpStatus.CREATED);
     }
 
@@ -47,9 +46,9 @@ public class CommentController {
             @PathVariable("todoId") Long todoId,
             @PathVariable("commentId") Long commentId,
             @RequestBody UpdateCommentRequestDto request,
-            HttpSession session
+            HttpServletRequest servletRequest
     ) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(commentService.updateComment(userId, request,todoId,commentId), HttpStatus.OK);
     }
 
@@ -58,9 +57,9 @@ public class CommentController {
     public ResponseEntity<DeleteCommentResponseDto> deleteComment(
             @PathVariable("todoId") Long todoId,
             @PathVariable("commentId") Long commentId,
-            HttpSession session
+            HttpServletRequest servletRequest
     ) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(commentService.deleteComment(userId, todoId,commentId), HttpStatus.OK);
     }
 }

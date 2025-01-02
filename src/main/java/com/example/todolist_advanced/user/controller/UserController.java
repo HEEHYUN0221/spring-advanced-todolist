@@ -4,7 +4,7 @@ import com.example.todolist_advanced.user.model.UserDto;
 import com.example.todolist_advanced.user.model.request.SignUpRequestDto;
 import com.example.todolist_advanced.user.model.request.UpdateUserRequestDto;
 import com.example.todolist_advanced.user.service.UserService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,24 +31,23 @@ public class UserController {
 
     //본인 정보 조회
     @GetMapping("/my-info")
-    public ResponseEntity<UserDto> findUserMyInfo(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity<UserDto> findUserMyInfo(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
         return new ResponseEntity<>(userService.findUser(userId),HttpStatus.OK);
     }
 
     //유저 수정(이름, 이메일)
     @PatchMapping("/my-info/update")
-    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UpdateUserRequestDto request,HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UpdateUserRequestDto request,HttpServletRequest servletRequest) {
+        Long userId = (Long) servletRequest.getAttribute("userId");
         return new ResponseEntity<>(userService.updateUser(userId,request), HttpStatus.OK);
     }
 
     //유저 탈퇴
     @PatchMapping("/my-info/deletion")
-    public ResponseEntity<UserDto> softDeleteUser(HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    public ResponseEntity<UserDto> softDeleteUser(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
         userService.softDeleteUser(userId);
-        session.invalidate();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

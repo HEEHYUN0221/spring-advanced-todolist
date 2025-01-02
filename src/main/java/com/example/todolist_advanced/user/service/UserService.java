@@ -1,6 +1,7 @@
 package com.example.todolist_advanced.user.service;
 
-import com.example.todolist_advanced.common.config.encode.PasswordEncoder;
+import com.example.todolist_advanced.common.utils.JwtUtil;
+import com.example.todolist_advanced.common.utils.PasswordEncoder;
 import com.example.todolist_advanced.common.entity.User;
 import com.example.todolist_advanced.common.exception.ValidateException;
 import com.example.todolist_advanced.user.model.UserDto;
@@ -21,6 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     public UserDto createUser(SignUpRequestDto request) {
         User user = User.createUser(request, passwordEncoder);
@@ -32,10 +34,16 @@ public class UserService {
         return UserDto.convertDto(user);
     }
 
-    public Long getUserId(LoginRequestDto request) {
+    public String getLogin(LoginRequestDto request) {
+
+        if(!userRepository.existsByEmailAndSignStatusTrue(request.email())) {
+            throw new LoginException("존재하지 않는 아이디 입니다.");
+        }
+
         User user = userRepository.findUserByEmail(request.email());
+
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
-            return user.getId();
+            return jwtUtil.generateToken(user.getId(),user.getUserName());
         } else {
             throw new LoginException("비밀번호가 일치하지 않습니다.");
         }
