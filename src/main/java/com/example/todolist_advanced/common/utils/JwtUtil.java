@@ -19,7 +19,8 @@ import java.util.Date;
 public class JwtUtil {
 
     public static final String BARER_PREFIX = "Bearer ";
-    private final long TOKEN_TIME = 60*60*1000L;
+    private final long ACCESS_TOKEN_TIME = 60*30*1000L;
+    private final long REFRESH_TOKEN_TIME = 60*60*1000L;
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
     @Value("${jwt.secret.key}")
@@ -41,14 +42,27 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public String generateToken(Long userId, String username, UserRoleEnum userRole) {
+    public String generateAccessToken(Long userId, String username, UserRoleEnum userRole) {
         Date date = new Date();
         return BARER_PREFIX +
                 Jwts.builder()
                         .setSubject(username)
                         .claim("auth",userRole)
                         .claim("userId", userId)
-                        .setExpiration(new Date(date.getTime() + TOKEN_TIME))
+                        .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
+                        .setIssuedAt(date)
+                        .signWith(key, signatureAlgorithm)
+                        .compact();
+    }
+
+    public String generateRefreshToken(Long userId, String username, UserRoleEnum userRole) {
+        Date date = new Date();
+        return BARER_PREFIX +
+                Jwts.builder()
+                        .setSubject(username)
+                        .claim("auth",userRole)
+                        .claim("userId", userId)
+                        .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
                         .compact();
