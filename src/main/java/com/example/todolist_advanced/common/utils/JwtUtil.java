@@ -1,5 +1,6 @@
 package com.example.todolist_advanced.common.utils;
 
+import com.example.todolist_advanced.common.enums.UserRoleEnum;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -40,11 +41,12 @@ public class JwtUtil {
                 .getBody();
     }
 
-    public String generateToken(Long userId, String username) {
+    public String generateToken(Long userId, String username, UserRoleEnum userRole) {
         Date date = new Date();
         return BARER_PREFIX +
                 Jwts.builder()
                         .setSubject(username)
+                        .claim("auth",userRole)
                         .claim("userId", userId)
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
@@ -71,6 +73,12 @@ public class JwtUtil {
         return false;
     }
 
+    public String extractRoles(String token) { return Jwts.parser()
+            .setSigningKey(key)
+            .parseClaimsJws(token)
+            .getBody()
+            .get("auth", String.class);}
+
 
     public Long extractUserId(String jwt) {
         return Jwts.parser()
@@ -78,5 +86,10 @@ public class JwtUtil {
                 .parseClaimsJws(jwt)
                 .getBody()
                 .get("userId",Long.class);
+    }
+
+    public boolean hasRole(String token, String role) {
+        String roles = extractRoles(token);
+        return roles.contains(role);
     }
 }

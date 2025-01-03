@@ -55,6 +55,15 @@ public class JwtFilter implements Filter {
 
         username = jwtUtil.extractUsername(jwt);
 
+        if(requestURI.startsWith("/api/admin")) {
+            if(jwtUtil.hasRole(jwt,"ADMIN")) {
+                filterChain.doFilter(servletRequest,servletResponse);
+            } else {
+                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Do not have access.");
+            }
+            return;
+        }
+
         servletRequest.setAttribute("userName",username);
         servletRequest.setAttribute("userId",userId);
 
@@ -65,4 +74,5 @@ public class JwtFilter implements Filter {
     private boolean isWhiteList(String requestURI) {
         return PatternMatchUtils.simpleMatch(WHITE_LIST, requestURI);
     }
+
 }

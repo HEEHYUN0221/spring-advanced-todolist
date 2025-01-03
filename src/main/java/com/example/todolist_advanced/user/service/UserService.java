@@ -1,5 +1,6 @@
 package com.example.todolist_advanced.user.service;
 
+import com.example.todolist_advanced.common.enums.UserRoleEnum;
 import com.example.todolist_advanced.common.utils.JwtUtil;
 import com.example.todolist_advanced.common.utils.PasswordEncoder;
 import com.example.todolist_advanced.common.entity.User;
@@ -43,7 +44,7 @@ public class UserService {
         User user = userRepository.findUserByEmail(request.email());
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
-            return jwtUtil.generateToken(user.getId(),user.getUserName());
+            return jwtUtil.generateToken(user.getId(),user.getUserName(),user.getRole());
         } else {
             throw new LoginException("비밀번호가 일치하지 않습니다.");
         }
@@ -83,5 +84,12 @@ public class UserService {
         User user = userRepository.findByIdOrElseThrow(userId);
         user.updateSignStatus(false);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void userRoleChangeAdmin(Long userId) {
+        User changeUser = userRepository.findByIdOrElseThrow(userId);
+        changeUser.updateRole(UserRoleEnum.ADMIN);
+        userRepository.save(changeUser);
     }
 }

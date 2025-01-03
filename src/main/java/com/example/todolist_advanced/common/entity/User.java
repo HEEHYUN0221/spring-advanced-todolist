@@ -1,5 +1,6 @@
 package com.example.todolist_advanced.common.entity;
 
+import com.example.todolist_advanced.common.enums.UserRoleEnum;
 import com.example.todolist_advanced.common.utils.PasswordEncoder;
 import com.example.todolist_advanced.user.model.request.SignUpRequestDto;
 import jakarta.persistence.*;
@@ -39,6 +40,10 @@ public class User extends BaseTime {
     @Column
     private boolean signStatus;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private UserRoleEnum role;
+
 
     public static User createUser(SignUpRequestDto request, PasswordEncoder passwordEncoder) {
         String encodePassword = passwordEncoder.encode(request.password());
@@ -47,11 +52,16 @@ public class User extends BaseTime {
                 request.email(),
                 encodePassword,
                 null,
-                true);
+                true,
+                UserRoleEnum.USER);
     }
 
     public void updateSignStatus(boolean signStatus) {
         this.signStatus=signStatus;
+    }
+
+    public void updateRole(UserRoleEnum role) {
+        this.role = role;
     }
 
 

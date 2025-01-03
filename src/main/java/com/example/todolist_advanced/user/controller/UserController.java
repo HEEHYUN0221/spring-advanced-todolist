@@ -50,4 +50,5 @@ public class UserController {
         userService.softDeleteUser(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }
