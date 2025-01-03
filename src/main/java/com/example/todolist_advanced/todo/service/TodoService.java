@@ -2,7 +2,7 @@ package com.example.todolist_advanced.todo.service;
 
 import com.example.todolist_advanced.common.entity.Todo;
 import com.example.todolist_advanced.common.entity.User;
-import com.example.todolist_advanced.common.exception.ValidateException;
+import com.example.todolist_advanced.common.utils.DateUtils;
 import com.example.todolist_advanced.todo.model.TodoDto;
 import com.example.todolist_advanced.todo.model.request.CreateTodoRequestDto;
 import com.example.todolist_advanced.todo.model.request.UpdateTodoRequestDto;
@@ -11,7 +11,6 @@ import com.example.todolist_advanced.todo.repository.TodoRepository;
 import com.example.todolist_advanced.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,8 +55,8 @@ public class TodoService {
 
     public List<TodoDto> findTodoByUserNameOrUpdateDate(String name, LocalDate updateDate) {
 
-        LocalDateTime startday = updateDate.atStartOfDay();
-        LocalDateTime endday = updateDate.atTime(23,59,59);
+        LocalDateTime startday = DateUtils.getStartOfDay(updateDate);
+        LocalDateTime endday = DateUtils.getEndOfDay(updateDate);
 
         return todoRepository.findByUser_UserNameAndCreatedAtBetweenAndUser_SignStatusTrue(name,startday,endday)
                 .stream()
@@ -67,22 +66,10 @@ public class TodoService {
 
     @Transactional
     public TodoDto updateTodo(Long userId, UpdateTodoRequestDto requestDto, Long todoId) {
+        Todo todo = todoRepository.findByIdOrElseThrow(todoId);
+        todo.validMine(userId,todo);
 
-        if(requestDto.contents()==null&&requestDto.title()==null) {
-            throw new ValidateException("잘못된 입력입니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        Todo todo = validMine(userId,todoId);
-
-        if(!(requestDto.contents()==null)){
-            todo.setContents(requestDto.contents());
-        }
-
-        if(!(requestDto.title()==null)) {
-            todo.setTitle(requestDto.title());
-        }
-
-        todoRepository.saveAndFlush(todo);
+        todo.update(requestDto.title(), requestDto.contents());
 
         User user = userRepository.findByIdOrElseThrow(userId);
         user.setLastModifyToDoList(todo.getLastModifiedAt());
@@ -93,20 +80,13 @@ public class TodoService {
     @Transactional
     public DeleteTodoResponseDto deleteTodo(Long userId, Long todoId) {
 
-        Todo todo = validMine(userId,todoId);
+        Todo todo = todoRepository.findByIdOrElseThrow(todoId);
+        todo.validMine(userId,todo);
+
         todoRepository.delete(todo);
         return new DeleteTodoResponseDto("게시물 삭제에 성공했습니다.");
     }
 
-    public Todo validMine(Long userId, Long todoId) {
-        Todo todo = todoRepository.findByIdOrElseThrow(todoId);
-
-        if(!userId.equals(todo.getUser().getId())){
-            throw new ValidateException("본인의 할일에서만 접근 가능한 기능입니다.",HttpStatus.BAD_REQUEST);
-        }
-
-        return todo;
-    }
 
 
 }
